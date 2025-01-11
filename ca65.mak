@@ -57,6 +57,8 @@ RM 			:= $(GNUWIN_DIR)/rm.exe
 FIND 		:= $(GNUWIN_DIR)/find.exe
 
 PYTHON		?= python
+
+#	show memory usage
 MEMUSE		?= $(PYTHON) $(MAKE_DIR)/memuse.py
 
 #	upload using teraterm for windows
@@ -108,7 +110,7 @@ SYM_FILE	:= $(LST_DIR)/linker.sym
 #==============================================================================
 #   targets
 #------------------------------------------------------------------------------
-.phony: default all compile upload memuse clean 
+.phony: default all compile upload clean 
 
 default: compile
 
@@ -116,13 +118,11 @@ all: compile upload
 
 lib: $(LIB_FILE)
 
-compile: $(BIN_FILE)
+compile: $(BIN_FILE) $(MAP_FILE)
+	@$(MEMUSE) -v $(MAP_FILE)
 
 upload:
 	$(UPLOAD) $(BIN_ADDR) $(realpath $(BIN_FILE))
-
-memuse: $(MAP_FILE)	
-	@$(MEMUSE) -v $(MAP_FILE)
 
 clean:
 	-$(RM) -r $(BUILD_DIR)
@@ -148,6 +148,5 @@ $(LIB_FILE): $(LIB_OBJS)
 #------------------------------------------------------------------------------
 #	link object files
 
-$(BIN_FILE): $(NAMED_OBJS) $(LIB_FILE) $(LINKER_CFG)
+$(BIN_FILE) $(MAP_FILE): $(NAMED_OBJS) $(LIB_FILE) $(LINKER_CFG)
 	$(LD65) $(LD65_FLAGS) -o $(BIN_FILE) -C $(LINKER_CFG) -m $(MAP_FILE) -Ln $(SYM_FILE) $(NAMED_OBJS) $(LIB_FILE)
-	@$(PYTHON) memuse.py -v $(MAP_FILE)
