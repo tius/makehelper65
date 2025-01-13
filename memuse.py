@@ -4,7 +4,6 @@
 #
 #   usage: memuse.py <mapfile> [-v]
 
-import sys
 import re
 import argparse
 
