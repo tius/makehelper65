@@ -18,7 +18,7 @@
 #	source files:
 #		- pass source files in SRC_NAMES in the order they should be linked
 #		- re-order files if the linker detects forbidden page branches
-#		- referenced source files are added automatically via LIB_FILE
+#		- other source files are added automatically via LIB_FILE if referenced
 #
 #------------------------------------------------------------------------------
 #   MIT License
@@ -143,10 +143,19 @@ $(OBJ_DIR)/%.o : $(SRC_DIR)/%.s $(OBJ_DIRS) $(LST_DIRS) $(ALL_INCS)
 #	build lib file
 
 $(LIB_FILE): $(LIB_OBJS) 
-	$(AR65) a $(LIB_FILE) $(LIB_OBJS)  
+	$(AR65) r $(LIB_FILE) $(LIB_OBJS)  
 
 #------------------------------------------------------------------------------
 #	link object files
 
+ifneq ($(LIB_OBJS),)
+
 $(BIN_FILE) $(MAP_FILE): $(NAMED_OBJS) $(LIB_FILE) $(LINKER_CFG)
 	$(LD65) $(LD65_FLAGS) -o $(BIN_FILE) -C $(LINKER_CFG) -m $(MAP_FILE) -Ln $(SYM_FILE) $(NAMED_OBJS) $(LIB_FILE)
+
+else
+
+$(BIN_FILE) $(MAP_FILE): $(NAMED_OBJS) $(LINKER_CFG)
+	$(LD65) $(LD65_FLAGS) -o $(BIN_FILE) -C $(LINKER_CFG) -m $(MAP_FILE) -Ln $(SYM_FILE) $(NAMED_OBJS)
+
+endif
